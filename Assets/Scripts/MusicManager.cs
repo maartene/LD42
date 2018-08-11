@@ -16,14 +16,14 @@ public class MusicManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (CubeSpawner.SpawnedCubeCount > 0)
+/*		if (CubeSpawner.SpawnedCubeCount > 0)
         {
             nextNoteTimer -= Time.deltaTime;
 
             if (nextNoteTimer <= 0)
             {
                 Cubie c = CubeSpawner.GetCube(noteIndex);
-                c.PlayNote(0.5f * 60.0f / BPM);
+                //c.PlayNote(0.5f * 60.0f / BPM);
                 noteIndex -= 1;
                 if (noteIndex < 0)
                 {
@@ -31,6 +31,6 @@ public class MusicManager : MonoBehaviour {
                 }
                 nextNoteTimer = 60.0f / BPM;
             }
-        }
+        }*/
 	}
 }

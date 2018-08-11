@@ -27,82 +27,75 @@ public class Cubie : MonoBehaviour
     public int cubeLevel = 0;
 
     Rigidbody rigidBody;
-    Collider collider;
-    Renderer renderer;
-    AudioSource audioSource;
+    Collider m_collider;
+    Renderer m_renderer;
 
-    public Material normalMaterial;
-    public Material highLightMaterial;
+    Material material;
 
-    Material m_normalMaterial;
-    Material m_highLightMaterial;
+    public CubeSpawner owner;
+    public bool isFinalCube = false;
+
+    float t = 0;
 
     // Use this for initialization
-    void Start () {
-        rigidBody = GetComponent<Rigidbody>();
-        collider = GetComponent<Collider>();
-        renderer = GetComponent<Renderer>();
-        audioSource = GetComponent<AudioSource>();
+    void Start () {        
 
-        m_normalMaterial = new Material(normalMaterial);
-        m_highLightMaterial = new Material(highLightMaterial);
+        rigidBody = GetComponent<Rigidbody>();
+        m_collider = GetComponent<Collider>();
+        m_renderer = GetComponent<Renderer>();
+
+        material = new Material(m_renderer.material);
+
+        if (isFinalCube)
+        {
+            Debug.Log("Won!!!");
+            StartCoroutine(Spectrum());
+        }
 
         SetColor();
-        SetPitch();
 
-    }
-
-    public void PlayNote(float length = 1f) 
-    {
-        StartCoroutine(PlayNoteCR(length));
-    }
-
-    IEnumerator PlayNoteCR(float length)
-    {
-        audioSource.Play();
-        HighLight(true);
-        yield return new WaitForSeconds(length);
-        HighLight(false);
-        audioSource.Stop();
-    }
-
-    void HighLight(bool state)
-    {
-        if (state)
-        {
-            renderer.material = m_highLightMaterial;
-        }
-        else
-        {
-            renderer.material = m_normalMaterial;
-        }
     }
 
     public void IncreaseCubeLevel()
     {
         cubeLevel += 1;
         SetColor();
-        SetPitch();
     }
 
     void SetColor()
-    {    
+    {
+        if (isFinalCube)
+        {
+            return;
+
+        }
+
+        material.mainTextureScale = Vector2.one / 4.0f;
+        //int column = 3 - cubeLevel % 4;
+        //float uv_x = 1.0f - (material.mainTextureScale.x * (float)column) - material.mainTextureScale.x;
+
+        int column = cubeLevel % 4;
+        float uv_x = material.mainTextureScale.x * (float)column;
+        material.mainTextureOffset = new Vector2(uv_x, cubeLevel / 4 * material.mainTextureScale.y);
+        Debug.Log("column: "+column + " uv_x:"+ uv_x + " offset: " + material.mainTextureOffset);
         Color color = new HSBColor((float)((cubeLevel * 3) % 16) / 16.0f, 1, 1).ToColor();
 
-        m_normalMaterial.color = color;
-        m_highLightMaterial.color = color;
-        m_highLightMaterial.SetColor("_EmissionColor", color);
-        
-        renderer.material = m_normalMaterial;        
+        material.color = color;
+
+
+              
+        m_renderer.material = material;      
     }
 
-    void SetPitch()
+    IEnumerator Spectrum()
     {
-        float octave = 1 + (cubeLevel / 4) ;
-        
-
-        float pitch = (octave * PITCHES[cubeLevel % 4]) / PITCHES[0];
-        audioSource.pitch = pitch;
+        while (true)
+        {
+            t = Random.Range(0.0f, 1.0f);
+            material.color = new HSBColor(t, 1, 1).ToColor();
+            m_renderer.material = material;
+            yield return new WaitForSeconds(0.1f);
+        }
     }
 
 	// Update is called once per frame
@@ -113,17 +106,26 @@ public class Cubie : MonoBehaviour
     public void MakeRigidBodyDraggable(bool state)
     {
         rigidBody.isKinematic = state;
-        collider.isTrigger = state;
+        m_collider.isTrigger = state;
     }
 
     public void OnDragStart(Vector3 mousePosition)
     {
+        if (isFinalCube)
+        {
+            return;
+        }
+
         Debug.Log("Begin drag");
         MakeRigidBodyDraggable(true);
     }
 
     public void OnDrag(Vector3 mousePosition)
     {
+        if (isFinalCube)
+        {
+            return;
+        }
 
         Plane plane = new Plane(Vector3.back, Vector3.zero);
         Ray ray = Camera.main.ScreenPointToRay(mousePosition);
@@ -132,13 +134,18 @@ public class Cubie : MonoBehaviour
 
         Vector3 targetPosition = Camera.main.transform.position + ray.direction * distance;
 
-        targetPosition = new Vector3(0, targetPosition.y, 0);
+        targetPosition = new Vector3(owner.transform.position.x, targetPosition.y, owner.transform.position.z);
 
         transform.position = targetPosition;
     }
 
     public void OnDragEnd(Vector3 mousePosition)
     {
+        if (isFinalCube)
+        {
+            return;
+        }
+
         // first we need to determine whether we are above another cube
         Ray ray = Camera.main.ScreenPointToRay(mousePosition);
         
@@ -158,10 +165,23 @@ public class Cubie : MonoBehaviour
                 if (c.cubeLevel == this.cubeLevel)
                 {
                     // we are on the level
-                    // we will update the other cubie
-                    c.IncreaseCubeLevel();
-                    c.MakeRigidBodyDraggable(false);
+                    // if we are already on the maximum level, we will spawn a cube in the next spawner
+
+                    if (cubeLevel >= owner.maxLevel)
+                    {
+                        owner.nextSpawner.SpawnCube(cubeLevel + 1);
+                        owner.RemoveCube(c);
+                        Destroy(c.gameObject);
+                    } else
+                    {
+                        // we will update the other cubie
+                        c.IncreaseCubeLevel();
+                        c.MakeRigidBodyDraggable(false);
+                    }
+
+
                     // and we will destroy ourselves
+                    owner.RemoveCube(this);
                     Destroy(gameObject);
                 } else
                 {

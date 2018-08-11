@@ -19,14 +19,21 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CubeSpawner : MonoBehaviour {
-    const int MAX_CUBES = 16;
+    const int MAX_CUBES = 6;
 
     public Cubie cubePrefab;
 
-    static List<Cubie> spawnedCubes = new List<Cubie>();
+    List<Cubie> spawnedCubes = new List<Cubie>();
 
     public float cubeSpawnDelay = 5f;
     float cubeSpawnTimeRemaining = 0f;
+
+    public bool autoSpawn = false;
+
+    public CubeSpawner nextSpawner;
+    public int maxLevel = 3;
+
+    public bool debugMode = false;
 
 	// Use this for initialization
 	void Start () {
@@ -35,22 +42,37 @@ public class CubeSpawner : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        cubeSpawnTimeRemaining -= Time.deltaTime;
-
-	    if (cubeSpawnTimeRemaining <= 0 && spawnedCubes.Count < MAX_CUBES)
+        if (debugMode && Input.GetKeyDown(KeyCode.S))
         {
-            SpawnCube();
-            cubeSpawnTimeRemaining = cubeSpawnDelay;
-        }	
+            SpawnCube(maxLevel-1);
+        }
+
+        if (autoSpawn)
+        {
+            cubeSpawnTimeRemaining -= Time.deltaTime;
+
+            if (cubeSpawnTimeRemaining <= 0 && spawnedCubes.Count < MAX_CUBES)
+            {
+                SpawnCube();
+                cubeSpawnTimeRemaining = cubeSpawnDelay;
+            }
+        }
 	}
 
-    void SpawnCube()
+    public void SpawnCube(int level = 0)
     {
         Cubie cubie = Instantiate(cubePrefab, transform);
+        cubie.cubeLevel = level;
+        cubie.owner = this;
         spawnedCubes.Add(cubie);
     }
 
-    public static int SpawnedCubeCount
+    public void RemoveCube(Cubie cube)
+    {
+        spawnedCubes.Remove(cube);
+    }
+
+    public int SpawnedCubeCount
     {
         get
         {
@@ -58,7 +80,7 @@ public class CubeSpawner : MonoBehaviour {
         }
     }
 
-    public static Cubie GetCube(int index)
+    public Cubie GetCube(int index)
     {
         if (index < 0)
         {
