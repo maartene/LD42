@@ -19,9 +19,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CubeSpawner : MonoBehaviour {
+    const int MAX_CUBES = 16;
 
-    public GameObject cubePrefab;
+    public Cubie cubePrefab;
 
+    static List<Cubie> spawnedCubes = new List<Cubie>();
 
     public float cubeSpawnDelay = 5f;
     float cubeSpawnTimeRemaining = 0f;
@@ -35,7 +37,7 @@ public class CubeSpawner : MonoBehaviour {
 	void Update () {
         cubeSpawnTimeRemaining -= Time.deltaTime;
 
-	    if (cubeSpawnTimeRemaining <= 0)
+	    if (cubeSpawnTimeRemaining <= 0 && spawnedCubes.Count < MAX_CUBES)
         {
             SpawnCube();
             cubeSpawnTimeRemaining = cubeSpawnDelay;
@@ -44,6 +46,39 @@ public class CubeSpawner : MonoBehaviour {
 
     void SpawnCube()
     {
-        Instantiate(cubePrefab, transform);
+        Cubie cubie = Instantiate(cubePrefab, transform);
+        spawnedCubes.Add(cubie);
+    }
+
+    public static int SpawnedCubeCount
+    {
+        get
+        {
+            return spawnedCubes.Count;
+        }
+    }
+
+    public static Cubie GetCube(int index)
+    {
+        if (index < 0)
+        {
+            Debug.LogError("Requested cube index should be greater than or equal to 0. Returning null.");
+            return null;
+        }
+
+        if (index >= spawnedCubes.Count)
+        {
+            Debug.LogError("Requested cube is out of bounds. Returning null.");
+            return null;
+        }
+
+        if (spawnedCubes[index] == null)
+        {
+            Debug.Log("Cube with index: " + index + " no longer exists. Removing it from list and returning the next cube.");
+            spawnedCubes.RemoveAt(index);
+            return GetCube(index);
+        }
+
+        return spawnedCubes[index];
     }
 }

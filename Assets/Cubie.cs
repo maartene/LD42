@@ -21,31 +21,88 @@ using UnityEngine.EventSystems;
 
 public class Cubie : MonoBehaviour
 {
+    public static readonly float[] PITCHES = { 264, 277.2f, 297, 311.1f, 330, 352, 370.0f, 396, 415.3f, 440f, 466.2f, 495, 528 };
+    public static readonly float[] CHORDS = { 0, 4, 7, 10 };
+
     public int cubeLevel = 0;
 
     Rigidbody rigidBody;
     Collider collider;
     Renderer renderer;
+    AudioSource audioSource;
 
-	// Use this for initialization
-	void Start () {
+    public Material normalMaterial;
+    public Material highLightMaterial;
+
+    Material m_normalMaterial;
+    Material m_highLightMaterial;
+
+    // Use this for initialization
+    void Start () {
         rigidBody = GetComponent<Rigidbody>();
         collider = GetComponent<Collider>();
         renderer = GetComponent<Renderer>();
+        audioSource = GetComponent<AudioSource>();
+
+        m_normalMaterial = new Material(normalMaterial);
+        m_highLightMaterial = new Material(highLightMaterial);
+
         SetColor();
-	}
+        SetPitch();
+
+    }
+
+    public void PlayNote(float length = 1f) 
+    {
+        StartCoroutine(PlayNoteCR(length));
+    }
+
+    IEnumerator PlayNoteCR(float length)
+    {
+        audioSource.Play();
+        HighLight(true);
+        yield return new WaitForSeconds(length);
+        HighLight(false);
+        audioSource.Stop();
+    }
+
+    void HighLight(bool state)
+    {
+        if (state)
+        {
+            renderer.material = m_highLightMaterial;
+        }
+        else
+        {
+            renderer.material = m_normalMaterial;
+        }
+    }
 
     public void IncreaseCubeLevel()
     {
         cubeLevel += 1;
         SetColor();
+        SetPitch();
     }
 
     void SetColor()
+    {    
+        Color color = new HSBColor((float)((cubeLevel * 3) % 16) / 16.0f, 1, 1).ToColor();
+
+        m_normalMaterial.color = color;
+        m_highLightMaterial.color = color;
+        m_highLightMaterial.SetColor("_EmissionColor", color);
+        
+        renderer.material = m_normalMaterial;        
+    }
+
+    void SetPitch()
     {
-        Material material = renderer.material;
-        material.color = new HSBColor((float)((cubeLevel * 3) % 16) / 16.0f, 1, 1).ToColor();
-        renderer.material = material;
+        float octave = 1 + (cubeLevel / 4) ;
+        
+
+        float pitch = (octave * PITCHES[cubeLevel % 4]) / PITCHES[0];
+        audioSource.pitch = pitch;
     }
 
 	// Update is called once per frame
@@ -106,6 +163,11 @@ public class Cubie : MonoBehaviour
                     c.MakeRigidBodyDraggable(false);
                     // and we will destroy ourselves
                     Destroy(gameObject);
+                } else
+                {
+                    // go back to the top
+                    transform.position = transform.parent.position;
+                    MakeRigidBodyDraggable(false);
                 }
             } else
             {
