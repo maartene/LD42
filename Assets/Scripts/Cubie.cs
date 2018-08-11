@@ -37,8 +37,19 @@ public class Cubie : MonoBehaviour
 
     float t = 0;
 
+    public float coinzDelay = 2.5f;
+    public float coinzTimer = 0;
+
+    public float GoldPerSecond {
+        get {
+            return 1.5f * Mathf.Pow(2.75123f, cubeLevel);
+        }
+    }
+
     // Use this for initialization
-    void Start () {        
+    void Start () {
+
+        coinzTimer = coinzDelay;
 
         rigidBody = GetComponent<Rigidbody>();
         m_collider = GetComponent<Collider>();
@@ -58,7 +69,9 @@ public class Cubie : MonoBehaviour
 
     public void IncreaseCubeLevel()
     {
+        Simulation.Instance.GoldPerSecond -= GoldPerSecond;
         cubeLevel += 1;
+        Simulation.Instance.GoldPerSecond += GoldPerSecond;
         SetColor();
     }
 
@@ -77,7 +90,7 @@ public class Cubie : MonoBehaviour
         int column = cubeLevel % 4;
         float uv_x = material.mainTextureScale.x * (float)column;
         material.mainTextureOffset = new Vector2(uv_x, cubeLevel / 4 * material.mainTextureScale.y);
-        Debug.Log("column: "+column + " uv_x:"+ uv_x + " offset: " + material.mainTextureOffset);
+//        Debug.Log("column: "+column + " uv_x:"+ uv_x + " offset: " + material.mainTextureOffset);
         Color color = new HSBColor((float)((cubeLevel * 3) % 16) / 16.0f, 1, 1).ToColor();
 
         material.color = color;
@@ -100,7 +113,14 @@ public class Cubie : MonoBehaviour
 
 	// Update is called once per frame
 	void Update () {
-		
+        coinzTimer -= Time.deltaTime;
+        if (coinzTimer < 0) {
+
+            Simulation.Instance.Gold += GoldPerSecond * coinzDelay;
+            // instantiate some display effect.
+
+            coinzTimer = coinzDelay;
+        }
 	}
 
     public void MakeRigidBodyDraggable(bool state)
@@ -183,6 +203,10 @@ public class Cubie : MonoBehaviour
                     // and we will destroy ourselves
                     owner.RemoveCube(this);
                     Destroy(gameObject);
+
+                    // and register a succesful swipe
+                    Simulation.Instance.Swipes += 1;
+
                 } else
                 {
                     // go back to the top

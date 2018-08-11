@@ -18,19 +18,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CubeSpawner : MonoBehaviour {
-    const int MAX_CUBES = 6;
+public class CubeSpawner : MonoBehaviour
+{
+    public int MAX_CUBES = 6;
 
     public Cubie cubePrefab;
+    public int SpawnCount { get; protected set; }
 
     List<Cubie> spawnedCubes = new List<Cubie>();
 
     public float cubeSpawnDelay = 5f;
-    float cubeSpawnTimeRemaining = 0f;
+    public float cubeSpawnTimeRemaining = 0;
 
     public bool autoSpawn = false;
 
     public CubeSpawner nextSpawner;
+
+    public int baseSpawnLevel = 0;
     public int maxLevel = 3;
 
     public bool debugMode = false;
@@ -53,7 +57,7 @@ public class CubeSpawner : MonoBehaviour {
 
             if (cubeSpawnTimeRemaining <= 0 && spawnedCubes.Count < MAX_CUBES)
             {
-                SpawnCube();
+                SpawnCube(baseSpawnLevel);
                 cubeSpawnTimeRemaining = cubeSpawnDelay;
             }
         }
@@ -65,11 +69,14 @@ public class CubeSpawner : MonoBehaviour {
         cubie.cubeLevel = level;
         cubie.owner = this;
         spawnedCubes.Add(cubie);
+        Simulation.Instance.GoldPerSecond += cubie.GoldPerSecond;
+        SpawnCount += 1;
     }
 
     public void RemoveCube(Cubie cube)
     {
         spawnedCubes.Remove(cube);
+        Simulation.Instance.GoldPerSecond -= cube.GoldPerSecond;
     }
 
     public int SpawnedCubeCount

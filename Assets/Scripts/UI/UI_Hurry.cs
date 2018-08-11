@@ -1,5 +1,4 @@
-﻿// Ludum Dare 42 entry
-// Copyright (C) 2018 Maarten Engels, thedreamweb.eu
+﻿// Copyright (C) 2018 Maarten Engels, thedreamweb.eu
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,36 +16,30 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class MusicManager : MonoBehaviour {
+public class UI_Hurry : MonoBehaviour {
 
-    public float BPM = 120;
+    public CubeSpawner spawner;
+    public Text text;
+    public RectTransform progressBarRectTransform;
 
-    float nextNoteTimer = 0;
-    public int noteIndex = 0;
+    Vector2 originalSize;
 
 	// Use this for initialization
 	void Start () {
-        nextNoteTimer = 60.0f / BPM;
+        originalSize = progressBarRectTransform.sizeDelta;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-/*		if (CubeSpawner.SpawnedCubeCount > 0)
-        {
-            nextNoteTimer -= Time.deltaTime;
-
-            if (nextNoteTimer <= 0)
-            {
-                Cubie c = CubeSpawner.GetCube(noteIndex);
-                //c.PlayNote(0.5f * 60.0f / BPM);
-                noteIndex -= 1;
-                if (noteIndex < 0)
-                {
-                    noteIndex = CubeSpawner.SpawnedCubeCount - 1;
-                }
-                nextNoteTimer = 60.0f / BPM;
-            }
-        }*/
+        progressBarRectTransform.sizeDelta = new Vector2(Mathf.Lerp(originalSize.x, 0, spawner.cubeSpawnTimeRemaining / spawner.cubeSpawnDelay), originalSize.y);
+        text.text = Mathf.FloorToInt(spawner.cubeSpawnTimeRemaining) + "s";
 	}
+
+    public void HurryButtonClicked() {
+        spawner.cubeSpawnTimeRemaining -= 1.0f;
+        Simulation.Instance.Clicks += 1;
+    }
+
 }

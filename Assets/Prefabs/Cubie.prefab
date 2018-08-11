@@ -126,3 +126,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cubeLevel: 0
   owner: {fileID: 0}
+  isFinalCube: 0
+  coinzDelay: 5
+  coinzTimer: 0
