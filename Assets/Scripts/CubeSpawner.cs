@@ -20,6 +20,7 @@ using UnityEngine;
 
 public class CubeSpawner : MonoBehaviour
 {
+    public float LUCKY_CHANGE = 0.15f;
     public int MAX_CUBES = 6;
 
     public Cubie cubePrefab;
@@ -40,6 +41,7 @@ public class CubeSpawner : MonoBehaviour
     public bool debugMode = false;
 
     public GameObject winEffect;
+    public UI_LuckyLabel luckyLabel;
 
     // Use this for initialization
 	void Start () {
@@ -59,11 +61,50 @@ public class CubeSpawner : MonoBehaviour
 
             if (cubeSpawnTimeRemaining <= 0 && spawnedCubes.Count < MAX_CUBES)
             {
-                SpawnCube(baseSpawnLevel);
+                // there is a small chance that a better cube is spawned if we already have some leveled up cubes
+                if (Simulation.Instance.highestCubeLevel > 1 && Random.value <= LUCKY_CHANGE)
+                {
+                    Debug.Log("Lucky!!");
+ 
+                    SpawnBetterCube();
+                }
+                else
+                {
+                    SpawnCube(baseSpawnLevel);                    
+                }
                 cubeSpawnTimeRemaining = cubeSpawnDelay;
             }
         }
 	}
+
+    void SpawnBetterCube()
+    {
+        int selectValue = Mathf.RoundToInt(Mathf.Lerp(1, Simulation.Instance.highestCubeLevel - 1, Random.value));
+        Debug.Log("SelectValue: " + selectValue);
+        CubeSpawner spawnerThatCanSpawn = null;
+        CubeSpawner testedSpawner = this;
+        while (spawnerThatCanSpawn == null && testedSpawner.nextSpawner != null)
+        {
+            if (selectValue <= testedSpawner.maxLevel)
+            {
+                spawnerThatCanSpawn = testedSpawner;
+            } else
+            {
+                testedSpawner = testedSpawner.nextSpawner;
+            }
+        }
+
+        if (spawnerThatCanSpawn == null)
+        {
+            Debug.LogWarning("No spawner for cube level: " + selectValue + " could be found. Spawning a basic block instead.");
+            SpawnCube();
+        } else
+        {
+            luckyLabel.gameObject.SetActive(true);
+            luckyLabel.SetLevel(selectValue);
+            spawnerThatCanSpawn.SpawnCube(selectValue);
+        }
+    }
 
     public void SpawnCube(int level = 0)
     {
