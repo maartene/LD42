@@ -18,30 +18,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Simulation : MonoBehaviour
-{
+public class ActivateObjectOnEnable : MonoBehaviour {
 
-    public static Simulation Instance { 
-        get {
-            if (_instance == null) {
-                _instance = GameObject.FindObjectOfType<Simulation>();
-            }
-            return _instance;
-        }
-    }
+    public GameObject objectToActivate;
+    public float delay = 0;
 
-    private static Simulation _instance;
-
-    public float Gold = 0;
-    public float GoldPerSecond = 0;
-    public int Clicks = 0;
-    public int Swipes = 0;
-    public int highestCubeLevel = 0;
-
-    private void Awake()
+    private void OnEnable()
     {
-        _instance = this;
+        StartCoroutine(ActivateObject());
     }
 
+    IEnumerator ActivateObject()
+    {
+        yield return new WaitForSeconds(delay);
 
+        objectToActivate.SetActive(true);
+    }
 }

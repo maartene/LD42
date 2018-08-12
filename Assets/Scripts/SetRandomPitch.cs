@@ -1,5 +1,4 @@
-﻿// Ludum Dare 42 entry
-// Copyright (C) 2018 Maarten Engels, thedreamweb.eu
+﻿// Copyright (C) 2018 Maarten Engels, thedreamweb.eu
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,30 +17,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Simulation : MonoBehaviour
-{
+public class SetRandomPitch : MonoBehaviour {
 
-    public static Simulation Instance { 
-        get {
-            if (_instance == null) {
-                _instance = GameObject.FindObjectOfType<Simulation>();
-            }
-            return _instance;
-        }
-    }
-
-    private static Simulation _instance;
-
-    public float Gold = 0;
-    public float GoldPerSecond = 0;
-    public int Clicks = 0;
-    public int Swipes = 0;
-    public int highestCubeLevel = 0;
-
-    private void Awake()
-    {
-        _instance = this;
-    }
-
-
+	// Use this for initialization
+	void Start () {
+        GetComponent<AudioSource>().pitch = Random.Range(0.75f, 1.25f);
+	}
+	
+	// Update is called once per frame
+	void Update () {
+		
+	}
 }

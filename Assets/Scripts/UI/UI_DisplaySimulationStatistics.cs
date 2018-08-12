@@ -23,11 +23,27 @@ public class UI_DisplaySimulationStatistics : MonoBehaviour {
 
     public Text coinzLabel;
     public Text coinzIncreaseLabel;
+    public Text highestCubeLevelLabel;
     public Text activityLabel;
 
     public static string FormatNumber(float number) {
         //TODO: add "pretty numbers"
-        return number.ToString();
+        int numberOfZeros = (int)Mathf.Log10(number);
+        if (numberOfZeros >= 12) {
+            return (number / Mathf.Pow(10, 12)).ToString("f2") + "t";
+        } else if ((numberOfZeros >= 9))
+        {
+            return (number / Mathf.Pow(10, 9)).ToString("f2") + "b";
+        }
+        else if ((numberOfZeros >= 6))
+        {
+            return (number / Mathf.Pow(10, 6)).ToString("f2") + "m";
+        }
+        else if ((numberOfZeros >= 3))
+        {
+            return (number / Mathf.Pow(10, 3)).ToString("f2") + "k";
+        }
+        else { return number.ToString("f0"); }
     } 
 
 	// Use this for initialization
@@ -39,6 +55,7 @@ public class UI_DisplaySimulationStatistics : MonoBehaviour {
 	void Update () {
         coinzLabel.text = "Coinz: " + FormatNumber(Simulation.Instance.Gold);
         coinzIncreaseLabel.text = FormatNumber(Simulation.Instance.GoldPerSecond) + " / second";
+        highestCubeLevelLabel.text = "Highest cube level: " + (Simulation.Instance.highestCubeLevel + 1);
         activityLabel.text = FormatNumber(Simulation.Instance.Clicks) + " Clicks / " + FormatNumber(Simulation.Instance.Swipes) + " Swipes";
 	}
 }

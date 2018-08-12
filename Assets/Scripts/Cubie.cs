@@ -24,11 +24,17 @@ public class Cubie : MonoBehaviour
     public static readonly float[] PITCHES = { 264, 277.2f, 297, 311.1f, 330, 352, 370.0f, 396, 415.3f, 440f, 466.2f, 495, 528 };
     public static readonly float[] CHORDS = { 0, 4, 7, 10 };
 
+    public AudioClip hitSound;
+
+    public UI_CoinzReceivedText coinzReceivedText;
+    public GameObject mergeEffect;
+
     public int cubeLevel = 0;
 
     Rigidbody rigidBody;
     Collider m_collider;
     Renderer m_renderer;
+    AudioSource m_audioSource;
 
     Material material;
 
@@ -54,6 +60,7 @@ public class Cubie : MonoBehaviour
         rigidBody = GetComponent<Rigidbody>();
         m_collider = GetComponent<Collider>();
         m_renderer = GetComponent<Renderer>();
+        m_audioSource = GetComponent<AudioSource>();
 
         material = new Material(m_renderer.material);
 
@@ -72,6 +79,8 @@ public class Cubie : MonoBehaviour
         Simulation.Instance.GoldPerSecond -= GoldPerSecond;
         cubeLevel += 1;
         Simulation.Instance.GoldPerSecond += GoldPerSecond;
+        Simulation.Instance.highestCubeLevel = Mathf.Max(Simulation.Instance.highestCubeLevel, cubeLevel);
+        Instantiate(mergeEffect, transform.position + Vector3.back, Quaternion.identity);
         SetColor();
     }
 
@@ -113,11 +122,18 @@ public class Cubie : MonoBehaviour
 
 	// Update is called once per frame
 	void Update () {
+        if (isFinalCube)
+        {
+            return;
+        }
+
         coinzTimer -= Time.deltaTime;
         if (coinzTimer < 0) {
 
             Simulation.Instance.Gold += GoldPerSecond * coinzDelay;
             // instantiate some display effect.
+            UI_CoinzReceivedText crt = Instantiate(coinzReceivedText, FindObjectOfType<Canvas>().transform);
+            crt.Setup(GoldPerSecond, transform.position);
 
             coinzTimer = coinzDelay;
         }
@@ -192,6 +208,7 @@ public class Cubie : MonoBehaviour
                         owner.nextSpawner.SpawnCube(cubeLevel + 1);
                         owner.RemoveCube(c);
                         Destroy(c.gameObject);
+                        Instantiate(mergeEffect, transform.position + Vector3.back, Quaternion.identity);
                     } else
                     {
                         // we will update the other cubie
@@ -202,11 +219,11 @@ public class Cubie : MonoBehaviour
 
                     // and we will destroy ourselves
                     owner.RemoveCube(this);
-                    Destroy(gameObject);
+                    Destroy(gameObject);                    
 
                     // and register a succesful swipe
                     Simulation.Instance.Swipes += 1;
-
+                    break;
                 } else
                 {
                     // go back to the top
@@ -222,5 +239,11 @@ public class Cubie : MonoBehaviour
         }
 
         
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        m_audioSource.pitch = Random.Range(0.75f, 1.25f);
+        m_audioSource.PlayOneShot(hitSound);
     }
 }

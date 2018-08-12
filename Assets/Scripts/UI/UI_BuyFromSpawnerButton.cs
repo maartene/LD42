@@ -21,7 +21,7 @@ using UnityEngine.UI;
 public class UI_BuyFromSpawnerButton : MonoBehaviour {
     const float BASE_SPAWN_PRICE = 10;
     const float INCREASE_PER_BUY_FACTOR = 1.53345f;
-    const float UNDER_SPAWNER_UNITS = 16f;
+    const float VERTICAL_OFFSET = -1f;
 
     public CubeSpawner spawner;
     Button button;
@@ -52,8 +52,8 @@ public class UI_BuyFromSpawnerButton : MonoBehaviour {
 
     public Vector2 uiAnchoredPosition()
     {
-        
-        Vector2 ViewportPosition = mainCamera.WorldToViewportPoint(spawner.transform.position + Vector3.down * UNDER_SPAWNER_UNITS);
+        Vector3 worldPosition = new Vector3(spawner.transform.position.x, 0, spawner.transform.position.z) + Vector3.up * VERTICAL_OFFSET;
+        Vector2 ViewportPosition = mainCamera.WorldToViewportPoint(worldPosition);
         Vector2 WorldObject_ScreenPosition = new Vector2(
             ((ViewportPosition.x * canvasRect.sizeDelta.x) - (canvasRect.sizeDelta.x * 0.5f)),
             ((ViewportPosition.y * canvasRect.sizeDelta.y) - (canvasRect.sizeDelta.y * 0.5f)));
@@ -65,7 +65,7 @@ public class UI_BuyFromSpawnerButton : MonoBehaviour {
     // Update is called once per frame
     void Update () {
         text.text = "Buy \n(" + UI_DisplaySimulationStatistics.FormatNumber(SpawnPrice) + ")";
-        if (spawner.SpawnCount > 0 && SpawnPrice <= Simulation.Instance.Gold && spawner.SpawnCount <= spawner.MAX_CUBES) {
+        if (spawner.SpawnCount > 0 && SpawnPrice <= Simulation.Instance.Gold && spawner.SpawnedCubeCount <= spawner.MAX_CUBES) {
             button.interactable = true;
         } else {
             button.interactable = false;

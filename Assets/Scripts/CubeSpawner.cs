@@ -39,7 +39,9 @@ public class CubeSpawner : MonoBehaviour
 
     public bool debugMode = false;
 
-	// Use this for initialization
+    public GameObject winEffect;
+
+    // Use this for initialization
 	void Start () {
 		
 	}
@@ -70,7 +72,14 @@ public class CubeSpawner : MonoBehaviour
         cubie.owner = this;
         spawnedCubes.Add(cubie);
         Simulation.Instance.GoldPerSecond += cubie.GoldPerSecond;
+        Simulation.Instance.highestCubeLevel = Mathf.Max(Simulation.Instance.highestCubeLevel, level);
         SpawnCount += 1;
+
+        if (cubePrefab.isFinalCube)
+        {
+            winEffect.SetActive(true);
+        }
+
     }
 
     public void RemoveCube(Cubie cube)
