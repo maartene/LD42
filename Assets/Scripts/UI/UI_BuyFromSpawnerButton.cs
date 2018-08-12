@@ -20,7 +20,7 @@ using UnityEngine.UI;
 
 public class UI_BuyFromSpawnerButton : MonoBehaviour {
     const float BASE_SPAWN_PRICE = 10;
-    const float INCREASE_PER_BUY_FACTOR = 1.53345f;
+    const float INCREASE_PER_BUY_FACTOR = 1.43345f;
     const float VERTICAL_OFFSET = -1f;
 
     public CubeSpawner spawner;
