@@ -1,9 +1,22 @@
-# Totally not a clicker
+# I'm TOTALLY not a clicker
 This game was created in 48 hours as a Ludum Dare 42 entry. I named this game in honor of my colleague Robert who totally dispises clickers. With this title however, I'm sure he'll play it anyway. 
 
 ## Instructions
+You only need a mouse to play this game!
 
-Play the game [here]()
+### Basics:
+Drag cubes over similar ones:
+- Two level 1 cubes make one level two cube
+- Two level 2 cubes make one level three cube
+- Two level 15 cubes make one level 16 cube
+- ???? level 1 cubes make one final cube
+
+### Coinz:
+Cubes earn you gold
+Better cubes earn more
+Buy cubes for gold
+
+Play the game [here](https://www.thedreamweb.eu/game_host/LD42/)
 
 ## Tools used
 - Unity (version 2018.2.2f1);
@@ -17,7 +30,7 @@ Copyright (C) 2018 Maarten Engels, thedreamweb.eu
 ### Third Party Assets
 This project contains the Boogaloo font:
 Copyright (c) 2011, John Vargas Beltran 
-(www.johnvargasbeltran.com|john.vargasbeltran@gmail.com),
+(www.johnvargasbeltran.com | john.vargasbeltran@gmail.com),
 with Reserved Font Name Boogaloo.
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1. 
