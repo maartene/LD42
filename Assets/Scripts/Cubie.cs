@@ -170,7 +170,8 @@ public class Cubie : MonoBehaviour
 
         Vector3 targetPosition = Camera.main.transform.position + ray.direction * distance;
 
-        targetPosition = new Vector3(owner.transform.position.x, targetPosition.y, owner.transform.position.z);
+        float y = Mathf.Max(targetPosition.y, 0.61f);
+        targetPosition = new Vector3(owner.transform.position.x, y, owner.transform.position.z);
 
         transform.position = targetPosition;
     }
@@ -181,6 +182,8 @@ public class Cubie : MonoBehaviour
         {
             return;
         }
+
+        MakeRigidBodyDraggable(false);
 
         // first we need to determine whether we are above another cube
         Ray ray = Camera.main.ScreenPointToRay(mousePosition);
